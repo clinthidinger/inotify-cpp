@@ -6,20 +6,34 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(BUILD_EXAMPLE "Build inotify-cpp example program" ON)
-option(BUILD_TEST "Build inotify-cpp unittest program" ON)
-option(BUILD_SHARED_LIBS "Build inotify-cpp as a shared library" ON)
-option(BUILD_STATIC_LIBS "Build inotify-cpp as a static library" OFF)
+option(BUILD_EXAMPLE "Build inotify-cpp example program" OFF)
+option(BUILD_TEST "Build inotify-cpp unittest program" OFF)
+option(BUILD_SHARED_LIBS "Build inotify-cpp as a shared library" OFF)
+option(BUILD_STATIC_LIBS "Build inotify-cpp as a static library" ON)
 option(USE_BOOST_FILESYSTEM "Build with boost::filesystem" OFF)
+if(NOT DEFINED BIMAP_INCLUDE_DIR)
+    set(BIMAP_INCLUDE_DIR /home/clint/code/temp/bimap)
+endif(NOT DEFINED BIMAP_INCLUDE_DIR)
+# include(ExternalProject)
+# ExternalProject_Add(
+#     bimap
+#     PREFIX bimap
+#     GIT_REPOSITORY https://github.com/LarsHagemann/bimap.git
+#     GIT_SHALLOW TRUE
+#     CONFIGURE_HANDLED_BY_BUILD ON
+#     INSTALL_COMMAND ""
+#     LOG_DOWNLOAD ON
+# )
 
 if(USE_BOOST_FILESYSTEM)
     list(APPEND USED_BOOST_LIBS filesystem)
+    find_package(Boost 1.54.0 COMPONENTS ${USED_BOOST_LIBS} REQUIRED)
 endif()
 if(BUILD_TEST)
     list(APPEND USED_BOOST_LIBS unit_test_framework)
 endif()
 
-find_package(Boost 1.54.0 COMPONENTS ${USED_BOOST_LIBS} REQUIRED)
+#find_package(Boost 1.54.0 COMPONENTS ${USED_BOOST_LIBS} REQUIRED)
 
 add_library(inotify-filesystem-adapter INTERFACE)
 if(CMAKE_CXX_STANDARD LESS 17 OR USE_BOOST_FILESYSTEM)
@@ -28,6 +42,11 @@ if(CMAKE_CXX_STANDARD LESS 17 OR USE_BOOST_FILESYSTEM)
 else()
     target_link_libraries(inotify-filesystem-adapter INTERFACE stdc++fs)
 endif()
+target_include_directories(inotify-filesystem-adapter INTERFACE 
+    ${BIMAP_INCLUDE_DIR}
+    #$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/bimap/src/bimap>
+    #$<INSTALL_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/bimap/src/bimap>
+)
 
 add_subdirectory(src)
 

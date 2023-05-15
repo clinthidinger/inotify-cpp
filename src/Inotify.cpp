@@ -1,6 +1,7 @@
 
 #include <inotify-cpp/Inotify.h>
 
+#include <string.h>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -161,7 +162,7 @@ void Inotify::watchFile(fs::path filePath)
                         << ". Path: " << filePath.string();
             throw std::runtime_error(errorStream.str());
         }
-        mDirectorieMap.left.insert({wd, filePath});
+        mDirectorieMap.insert({wd, filePath});
     } else {
         throw std::invalid_argument(
             "Can´t watch Path! Path does not exist. Path: " + filePath.string());
@@ -181,7 +182,7 @@ void Inotify::ignoreFile(fs::path file)
 
 void Inotify::unwatchFile(fs::path file)
 {
-    removeWatch(mDirectorieMap.right.at(file));
+    removeWatch(mDirectorieMap.get_key(file));
 }
 
 /**
@@ -204,7 +205,7 @@ void Inotify::removeWatch(int wd)
 
 fs::path Inotify::wdToPath(int wd)
 {
-    return mDirectorieMap.left.at(wd);
+    return mDirectorieMap.get_value(wd);
 }
 
 void Inotify::setEventMask(uint32_t eventMask)
@@ -333,7 +334,7 @@ void Inotify::readEventsFromBuffer(
 
         if(event->mask & IN_IGNORED){
             i += EVENT_SIZE + event->len;
-            mDirectorieMap.left.erase(event->wd);
+            mDirectorieMap.erase_key(event->wd);
             continue;
         }
 

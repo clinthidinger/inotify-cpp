@@ -7,10 +7,11 @@
 #pragma once
 #include <assert.h>
 #include <atomic>
-#include <boost/bimap.hpp>
+#include <bimap.hpp>
 #include <chrono>
 #include <errno.h>
 #include <exception>
+#include <functional>
 #include <map>
 #include <memory>
 #include <queue>
@@ -109,7 +110,7 @@ private:
   std::vector<std::string> mIgnoredDirectories;
   std::vector<std::string> mOnceIgnoredDirectories;
   std::queue<FileSystemEvent> mEventQueue;
-  boost::bimap<int, inotifypp::filesystem::path> mDirectorieMap;
+  stde::bimap<int, inotifypp::filesystem::path> mDirectorieMap;
   int mInotifyFd;
   std::atomic<bool> mStopped;
   int mEpollFd;
